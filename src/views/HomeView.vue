@@ -5,6 +5,9 @@
   </div>
   <div v-else>
     <p>Welcome {{ name }}</p>
+    <RouterLink to="/submit">Make submission</RouterLink>
+    <br />
+    <br />
     <RouterLink to="/logout">Logout</RouterLink>
   </div>
 </template>
