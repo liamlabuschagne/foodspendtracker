@@ -21,7 +21,6 @@ let weekStartString =
 const getLeaderboard = async () => {
   const querySnapshot = await getDocs(collection(db, 'foodspends'))
   querySnapshot.forEach((doc) => {
-    console.log(doc.id, ' => ', doc.data())
     foodspends.value.push({
       id: doc.id,
       name: doc.data().name,
