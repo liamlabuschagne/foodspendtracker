@@ -18,7 +18,6 @@ let name: string = ref('')
 const auth = getAuth()
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log('Setting name')
     name.value = user.displayName
   } else {
   }
