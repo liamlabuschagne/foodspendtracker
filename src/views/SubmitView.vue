@@ -30,10 +30,10 @@ let weekStartString =
   lastMonday.getFullYear() + '-' + (lastMonday.getMonth() + 1) + '-' + lastMonday.getDate()
 
 const getCurrentValue = async () => {
-  const docRef = doc(db, 'foodspends', auth.currentUser.uid, 'foodspends', weekStartString)
+  const docRef = doc(db, 'foodspends', auth.currentUser.uid)
   const docSnap = await getDoc(docRef)
   if (docSnap.exists()) {
-    currentValue.value = docSnap.data().amount
+    currentValue.value = docSnap.data()[weekStartString]
   }
 }
 
@@ -50,9 +50,13 @@ const submitForm = (event: Event) => {
   const input = event.target as HTMLFormElement
   const amount = input.amount.value
 
-  setDoc(doc(db, 'foodspends', auth.currentUser.uid, 'foodspends', weekStartString), {
-    amount: amount,
-  })
+  setDoc(
+    doc(db, 'foodspends', auth.currentUser.uid),
+    {
+      [weekStartString]: parseFloat(amount),
+    },
+    { merge: true },
+  )
     .then(() => {
       alert('Submitted $' + amount + ' for the week starting ' + lastMonday.toDateString())
       getCurrentValue()
