@@ -4,7 +4,8 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 const name: string = ref('')
-const weekStart = ref(null)
+const referenceDate = ref(null)
+let page = 0
 const auth = getAuth()
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -15,30 +16,33 @@ onAuthStateChanged(auth, (user) => {
 
 const foodspends = ref([])
 
-const setupLastMonday = () => {
-  if (!localStorage.getItem('lastMonday')) {
+const setupWeekStarting = () => {
+  if (!localStorage.getItem('weekStarting')) {
     let lastMonday = new Date()
     lastMonday.setDate(lastMonday.getDate() - lastMonday.getDay() - 6)
-    localStorage.setItem('lastMonday', lastMonday.toDateString())
+    localStorage.setItem('weekStarting', lastMonday.toDateString())
   }
 
-  let lastMonday = new Date(localStorage.getItem('lastMonday'))
-  weekStart.value = lastMonday
+  let weekStarting = new Date(localStorage.getItem('weekStarting'))
+  referenceDate.value = weekStarting
 }
-setupLastMonday()
+setupWeekStarting()
 
 const getLeaderboard = async () => {
   foodspends.value = []
-  let lastMonday = new Date(localStorage.getItem('lastMonday'))
-  let weekStartString =
-    lastMonday.getFullYear() + '-' + (lastMonday.getMonth() + 1) + '-' + lastMonday.getDate()
+  let weekStartingString =
+    referenceDate.value.getFullYear() +
+    '-' +
+    (referenceDate.value.getMonth() + 1) +
+    '-' +
+    referenceDate.value.getDate()
 
   const querySnapshot = await getDocs(collection(db, 'foodspends'))
   querySnapshot.forEach((doc) => {
     foodspends.value.push({
       id: doc.id,
       name: doc.data().name,
-      amount: doc.data()[weekStartString] || null,
+      amount: doc.data()[weekStartingString] || null,
     })
 
     foodspends.value = foodspends.value.sort((a, b) => {
@@ -54,10 +58,17 @@ const getLeaderboard = async () => {
 }
 
 const changeWeek = (change: number) => {
-  let lastMonday = new Date(localStorage.getItem('lastMonday'))
-  lastMonday.setDate(lastMonday.getDate() + change * 7)
-  localStorage.setItem('lastMonday', lastMonday.toDateString())
-  weekStart.value = lastMonday
+  page += change
+
+  if (page != 0) {
+    document.querySelector('#plusoneweek')?.removeAttribute('disabled')
+  } else {
+    document.querySelector('#plusoneweek')?.setAttribute('disabled', 'true')
+  }
+  let weekStarting = new Date(localStorage.getItem('weekStarting'))
+  weekStarting.setDate(weekStarting.getDate() + change * 7)
+  localStorage.setItem('weekStarting', weekStarting.toDateString())
+  referenceDate.value = weekStarting
   getLeaderboard()
 }
 
@@ -78,12 +89,12 @@ getLeaderboard()
   <main v-if="name !== ''">
     <h2>Food Spend Leaderboard</h2>
     <p>
-      This includes all sources of food include takeaways/restaurants for the week starting
-      {{ weekStart?.toDateString() }}
+      All food spending including takeaways/restaurants for the week starting
+      {{ referenceDate?.toDateString() }}.
     </p>
     <div id="controls">
       <button @click="changeWeek(-1)">-1 week</button>
-      <button @click="changeWeek(1)">+1 week</button>
+      <button id="plusoneweek" disabled="true" @click="changeWeek(1)">+1 week</button>
     </div>
     <table id="leaderboard">
       <thead>
