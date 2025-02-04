@@ -3,7 +3,8 @@ import { ref } from 'vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
-let name: string = ref('')
+const name: string = ref('')
+const weekStart = ref(null)
 const auth = getAuth()
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -12,13 +13,26 @@ onAuthStateChanged(auth, (user) => {
   }
 })
 
-let foodspends = ref([])
-let lastMonday = new Date()
-lastMonday.setDate(lastMonday.getDate() - lastMonday.getDay() - 6)
-let weekStartString =
-  lastMonday.getFullYear() + '-' + (lastMonday.getMonth() + 1) + '-' + lastMonday.getDate()
+const foodspends = ref([])
+
+const setupLastMonday = () => {
+  if (!localStorage.getItem('lastMonday')) {
+    let lastMonday = new Date()
+    lastMonday.setDate(lastMonday.getDate() - lastMonday.getDay() - 6)
+    localStorage.setItem('lastMonday', lastMonday.toDateString())
+  }
+
+  let lastMonday = new Date(localStorage.getItem('lastMonday'))
+  weekStart.value = lastMonday
+}
+setupLastMonday()
 
 const getLeaderboard = async () => {
+  foodspends.value = []
+  let lastMonday = new Date(localStorage.getItem('lastMonday'))
+  let weekStartString =
+    lastMonday.getFullYear() + '-' + (lastMonday.getMonth() + 1) + '-' + lastMonday.getDate()
+
   const querySnapshot = await getDocs(collection(db, 'foodspends'))
   querySnapshot.forEach((doc) => {
     foodspends.value.push({
@@ -39,6 +53,14 @@ const getLeaderboard = async () => {
   })
 }
 
+const changeWeek = (change: number) => {
+  let lastMonday = new Date(localStorage.getItem('lastMonday'))
+  lastMonday.setDate(lastMonday.getDate() + change * 7)
+  localStorage.setItem('lastMonday', lastMonday.toDateString())
+  weekStart.value = lastMonday
+  getLeaderboard()
+}
+
 getLeaderboard()
 </script>
 <template>
@@ -53,7 +75,9 @@ getLeaderboard()
     <br />
     <RouterLink to="/logout">Logout</RouterLink>
     <h2>Food Spend Leaderboard</h2>
-    <p>For the week starting {{ lastMonday.toDateString() }}</p>
+    <button @click="changeWeek(-1)">-1 week</button>
+    <button @click="changeWeek(1)">+1 week</button>
+    <p>For the week starting {{ weekStart?.toDateString() }}</p>
     <table id="leaderboard">
       <thead>
         <tr>
