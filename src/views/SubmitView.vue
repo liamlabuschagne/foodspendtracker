@@ -41,9 +41,9 @@ let weekStartString =
   lastMonday.getFullYear() + '-' + (lastMonday.getMonth() + 1) + '-' + lastMonday.getDate()
 
 const getCurrentValue = async () => {
-  const docRef = doc(db, 'foodspends', auth.currentUser.uid)
-  const docSnap = await getDoc(docRef)
-  if (docSnap.exists()) {
+  const docRef = auth.currentUser && doc(db, 'foodspends', auth.currentUser.uid)
+  const docSnap = docRef && (await getDoc(docRef))
+  if (docSnap?.exists()) {
     currentValue.value = docSnap.data()[weekStartString]
   }
 }
@@ -61,19 +61,20 @@ const submitForm = (event: Event) => {
   const input = event.target as HTMLFormElement
   const amount = input.amount.value
 
-  setDoc(
-    doc(db, 'foodspends', auth.currentUser.uid),
-    {
-      [weekStartString]: parseFloat(amount),
-    },
-    { merge: true },
-  )
-    .then(() => {
-      getCurrentValue()
-      input.amount.value = ''
-    })
-    .catch((error) => {
-      console.error('Error writing document: ', error)
-    })
+  auth.currentUser &&
+    setDoc(
+      doc(db, 'foodspends', auth.currentUser.uid),
+      {
+        [weekStartString]: parseFloat(amount),
+      },
+      { merge: true },
+    )
+      .then(() => {
+        getCurrentValue()
+        input.amount.value = ''
+      })
+      .catch((error) => {
+        console.error('Error writing document: ', error)
+      })
 }
 </script>

@@ -12,7 +12,7 @@ import { useRouter } from 'vue-router'
 import { db } from '../firebase'
 import { onMounted } from 'vue'
 const isLoggedIn = ref(false)
-const referenceDate = ref(null)
+const referenceDate = ref<Date>(new Date())
 const page = ref(0)
 const auth = getAuth()
 const router = useRouter()
@@ -26,9 +26,18 @@ onAuthStateChanged(auth, (user) => {
   }
 })
 
-const foodspends = ref([])
+type FoodSpend = {
+  id: string
+  name: string
+  amount: number | null
+}
+
+const foodspends = ref<Array<FoodSpend>>([])
 
 const getLeaderboard = async () => {
+  if (!referenceDate.value) {
+    return
+  }
   foodspends.value = []
   let weekStartingString =
     referenceDate.value.getFullYear() +
@@ -39,7 +48,7 @@ const getLeaderboard = async () => {
 
   const querySnapshot = await getDocs(collection(db, 'foodspends'))
   querySnapshot.forEach((doc) => {
-    foodspends.value.push({
+    foodspends?.value.push({
       id: doc.id,
       name: doc.data().name,
       amount: doc.data()[weekStartingString] || null,
@@ -59,15 +68,15 @@ const getLeaderboard = async () => {
 
 const changeWeek = (change: number) => {
   page.value += change
-  localStorage.setItem('page', page.value)
+  localStorage.setItem('page', page.value.toString())
   console.log('Page is', page.value)
   if (page.value === 0) {
-    document.querySelector('#plusoneweek').disabled = true
+    document.querySelector('#plusoneweek')?.setAttribute('disabled', 'true')
   } else {
-    document.querySelector('#plusoneweek').removeAttribute('disabled')
+    document.querySelector('#plusoneweek')?.removeAttribute('disabled')
   }
 
-  let weekStarting = new Date(localStorage.getItem('weekStarting'))
+  let weekStarting = new Date(localStorage.getItem('weekStarting') || '')
   weekStarting.setDate(weekStarting.getDate() + change * 7)
   localStorage.setItem('weekStarting', weekStarting.toDateString())
   referenceDate.value = weekStarting
@@ -76,9 +85,9 @@ const changeWeek = (change: number) => {
 
 const setup = () => {
   if (!localStorage.getItem('page')) {
-    localStorage.setItem('page', 0)
+    localStorage.setItem('page', '0')
   }
-  page.value = parseInt(localStorage.getItem('page'))
+  page.value = parseInt(localStorage.getItem('page') || '0')
 
   if (!localStorage.getItem('weekStarting')) {
     let lastMonday = new Date()
@@ -86,7 +95,7 @@ const setup = () => {
     localStorage.setItem('weekStarting', lastMonday.toDateString())
   }
 
-  let weekStarting = new Date(localStorage.getItem('weekStarting'))
+  let weekStarting = new Date(localStorage.getItem('weekStarting') || '')
   referenceDate.value = weekStarting
   changeWeek(0)
 }
@@ -98,19 +107,20 @@ onMounted(() => {
 const signinWithGoogle = () => {
   signInWithPopup(auth, provider)
     .then((result) => {
-      setDoc(
-        doc(db, 'foodspends', auth.currentUser.uid),
-        {
-          name: result.user.displayName,
-        },
-        { merge: true },
-      )
-        .then(() => {
-          router.push('/')
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      auth.currentUser &&
+        setDoc(
+          doc(db, 'foodspends', auth.currentUser.uid),
+          {
+            name: result.user.displayName,
+          },
+          { merge: true },
+        )
+          .then(() => {
+            router.push('/')
+          })
+          .catch((error) => {
+            console.log(error)
+          })
     })
     .catch((error) => {
       console.log(error)
