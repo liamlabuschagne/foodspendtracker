@@ -1,16 +1,27 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
+import {
+  getAuth,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth'
+import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore'
+import { useRouter } from 'vue-router'
 import { db } from '../firebase'
-const name: string = ref('')
+const isLoggedIn = ref(false)
 const referenceDate = ref(null)
 let page = 0
 const auth = getAuth()
+const router = useRouter()
+const provider = new GoogleAuthProvider()
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    name.value = user.displayName
+    isLoggedIn.value = true
   } else {
+    isLoggedIn.value = false
   }
 })
 
@@ -73,17 +84,44 @@ const changeWeek = (change: number) => {
 }
 
 getLeaderboard()
+
+const signinWithGoogle = () => {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      setDoc(
+        doc(db, 'foodspends', auth.currentUser.uid),
+        {
+          name: result.user.displayName,
+        },
+        { merge: true },
+      )
+        .then(() => {
+          router.push('/')
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}
+const logout = () => {
+  signOut(auth).then(() => {
+    isLoggedIn.value = false
+  })
+}
 </script>
 <template>
   <header>
     <h1>Food Spend Tracker</h1>
     <p>See how your weekly food spending compares to other people!</p>
-    <nav v-if="name === ''">
-      <RouterLink to="/login">Login</RouterLink>
+    <nav v-if="!isLoggedIn">
+      <button @click="signinWithGoogle">Login with Google</button>
     </nav>
     <nav v-else>
       <RouterLink to="/submit">Make Submission</RouterLink>
-      <RouterLink to="/logout">Logout</RouterLink>
+      <button @click="logout">Logout</button>
     </nav>
   </header>
   <main>

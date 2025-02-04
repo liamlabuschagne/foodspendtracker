@@ -31,7 +31,7 @@ import { useRouter } from 'vue-router'
 
 const auth = getAuth()
 const currentValue = ref<number | null>(null)
-
+const router = useRouter()
 const today = new Date().toISOString().split('T')[0]
 
 // Get the date of the monday of the last full week
