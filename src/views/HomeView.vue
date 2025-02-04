@@ -64,21 +64,27 @@ const changeWeek = (change: number) => {
 getLeaderboard()
 </script>
 <template>
-  <h1>Home</h1>
-  <div v-if="name === ''">
-    <RouterLink to="/login">Login</RouterLink>
-  </div>
-  <div v-else>
-    <p>Welcome {{ name }}</p>
-    <RouterLink to="/submit">Make submission</RouterLink>
-    <br />
-    <br />
-    <RouterLink to="/logout">Logout</RouterLink>
+  <header>
+    <h1>Food Spend Tracker</h1>
+    <p>See how your weekly food spending compares to other people!</p>
+    <nav v-if="name === ''">
+      <RouterLink to="/login">Login</RouterLink>
+    </nav>
+    <nav v-else>
+      <RouterLink to="/submit">Make submission</RouterLink>
+      <RouterLink to="/logout">Logout</RouterLink>
+    </nav>
+  </header>
+  <main v-if="name !== ''">
     <h2>Food Spend Leaderboard</h2>
-    <button @click="changeWeek(-1)">-1 week</button>
-    <button @click="changeWeek(1)">+1 week</button>
-    <p>For the week starting {{ weekStart?.toDateString() }}</p>
-    <p>This includes all sources of food include takeaways/restaurants.</p>
+    <p>
+      This includes all sources of food include takeaways/restaurants for the week starting
+      {{ weekStart?.toDateString() }}
+    </p>
+    <div id="controls">
+      <button @click="changeWeek(-1)">-1 week</button>
+      <button @click="changeWeek(1)">+1 week</button>
+    </div>
     <table id="leaderboard">
       <thead>
         <tr>
@@ -93,15 +99,91 @@ getLeaderboard()
         </tr>
       </tbody>
     </table>
-  </div>
+  </main>
 </template>
 <style scoped>
 #leaderboard {
   display: block;
   text-align: left;
+  width: 100%;
 }
 #leaderboard td,
 #leaderboard th {
   padding: 0.5rem;
+  width: 100%;
+}
+
+#leaderboard th {
+  background-color: #f0f0f0;
+}
+
+#leaderboard tbody tr:nth-child(odd) {
+  background-color: #f0f0f0;
+}
+
+#leaderboard tbody tr:nth-child(even) {
+  background-color: #e0e0e0;
+}
+
+#leaderboard tbody tr:hover {
+  background-color: #d0d0d0;
+}
+
+#controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+main {
+  margin: auto;
+  width: 100%;
+  max-width: 500px;
+}
+
+button {
+  /* Some nice colouring and slightly rounded borders */
+  background-color: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  border-radius: 0.25rem;
+  padding: 1rem;
+}
+
+button:hover {
+  background-color: #e0e0e0;
+  cursor: pointer;
+}
+
+p {
+  margin: 0.5rem;
+}
+
+RouterLink {
+  margin: 0.5rem;
+}
+
+* {
+  font-family: 'Open Sans', sans-serif;
+}
+
+/* Centre the content in the page, add some nice fonts, styling, padding and put the links in a menu */
+h1 {
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+}
+
+header p {
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  flex-direction: row;
+  width: fit-content;
+  margin: 0 auto;
+  gap: 1rem;
 }
 </style>
