@@ -1,6 +1,7 @@
 <template>
   <h1>Submit</h1>
   <p>Submit your food spend for the week starting {{ lastMonday.toDateString() }}</p>
+  <p>This includes all sources of food include takeaways/restaurants.</p>
   <p v-if="currentValue">Current value: ${{ currentValue }}</p>
   <form @submit="submitForm">
     <label for="amount">Amount: $</label>

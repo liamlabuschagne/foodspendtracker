@@ -78,6 +78,7 @@ getLeaderboard()
     <button @click="changeWeek(-1)">-1 week</button>
     <button @click="changeWeek(1)">+1 week</button>
     <p>For the week starting {{ weekStart?.toDateString() }}</p>
+    <p>This includes all sources of food include takeaways/restaurants.</p>
     <table id="leaderboard">
       <thead>
         <tr>
