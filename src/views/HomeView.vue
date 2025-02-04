@@ -10,9 +10,10 @@ import {
 import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
 import { db } from '../firebase'
+import { onMounted } from 'vue'
 const isLoggedIn = ref(false)
 const referenceDate = ref(null)
-let page = 0
+const page = ref(0)
 const auth = getAuth()
 const router = useRouter()
 const provider = new GoogleAuthProvider()
@@ -26,18 +27,6 @@ onAuthStateChanged(auth, (user) => {
 })
 
 const foodspends = ref([])
-
-const setupWeekStarting = () => {
-  if (!localStorage.getItem('weekStarting')) {
-    let lastMonday = new Date()
-    lastMonday.setDate(lastMonday.getDate() - lastMonday.getDay() - 6)
-    localStorage.setItem('weekStarting', lastMonday.toDateString())
-  }
-
-  let weekStarting = new Date(localStorage.getItem('weekStarting'))
-  referenceDate.value = weekStarting
-}
-setupWeekStarting()
 
 const getLeaderboard = async () => {
   foodspends.value = []
@@ -69,13 +58,15 @@ const getLeaderboard = async () => {
 }
 
 const changeWeek = (change: number) => {
-  page += change
-
-  if (page != 0) {
-    document.querySelector('#plusoneweek')?.removeAttribute('disabled')
+  page.value += change
+  localStorage.setItem('page', page.value)
+  console.log('Page is', page.value)
+  if (page.value === 0) {
+    document.querySelector('#plusoneweek').disabled = true
   } else {
-    document.querySelector('#plusoneweek')?.setAttribute('disabled', 'true')
+    document.querySelector('#plusoneweek').removeAttribute('disabled')
   }
+
   let weekStarting = new Date(localStorage.getItem('weekStarting'))
   weekStarting.setDate(weekStarting.getDate() + change * 7)
   localStorage.setItem('weekStarting', weekStarting.toDateString())
@@ -83,7 +74,26 @@ const changeWeek = (change: number) => {
   getLeaderboard()
 }
 
-getLeaderboard()
+const setup = () => {
+  if (!localStorage.getItem('page')) {
+    localStorage.setItem('page', 0)
+  }
+  page.value = parseInt(localStorage.getItem('page'))
+
+  if (!localStorage.getItem('weekStarting')) {
+    let lastMonday = new Date()
+    lastMonday.setDate(lastMonday.getDate() - lastMonday.getDay() - 6)
+    localStorage.setItem('weekStarting', lastMonday.toDateString())
+  }
+
+  let weekStarting = new Date(localStorage.getItem('weekStarting'))
+  referenceDate.value = weekStarting
+  changeWeek(0)
+}
+
+onMounted(() => {
+  setup()
+})
 
 const signinWithGoogle = () => {
   signInWithPopup(auth, provider)
@@ -133,7 +143,7 @@ const logout = () => {
     <div id="controls">
       <button @click="changeWeek(-1)">&larr;</button>
       <button @click="getLeaderboard">&#10227; Refresh</button>
-      <button id="plusoneweek" disabled="true" @click="changeWeek(1)">&rarr;</button>
+      <button id="plusoneweek" @click="changeWeek(1)">&rarr;</button>
     </div>
     <table id="leaderboard">
       <thead>
