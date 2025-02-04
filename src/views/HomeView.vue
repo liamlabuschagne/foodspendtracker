@@ -82,11 +82,11 @@ getLeaderboard()
       <RouterLink to="/login">Login</RouterLink>
     </nav>
     <nav v-else>
-      <RouterLink to="/submit">Make submission</RouterLink>
+      <RouterLink to="/submit">Make Submission</RouterLink>
       <RouterLink to="/logout">Logout</RouterLink>
     </nav>
   </header>
-  <main v-if="name !== ''">
+  <main>
     <h2>Food Spend Leaderboard</h2>
     <p>
       All food spending including takeaways/restaurants for the week starting
@@ -144,57 +144,5 @@ getLeaderboard()
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-}
-
-main {
-  margin: auto;
-  width: 100%;
-  max-width: 500px;
-}
-
-button {
-  /* Some nice colouring and slightly rounded borders */
-  background-color: #f0f0f0;
-  border: 1px solid #d0d0d0;
-  border-radius: 0.25rem;
-  padding: 1rem;
-}
-
-button:hover {
-  background-color: #e0e0e0;
-  cursor: pointer;
-}
-
-p {
-  margin: 0.5rem;
-}
-
-RouterLink {
-  margin: 0.5rem;
-}
-
-* {
-  font-family: 'Open Sans', sans-serif;
-}
-
-/* Centre the content in the page, add some nice fonts, styling, padding and put the links in a menu */
-h1 {
-  text-align: center;
-}
-
-h2 {
-  text-align: center;
-}
-
-header p {
-  text-align: center;
-}
-
-nav {
-  display: flex;
-  flex-direction: row;
-  width: fit-content;
-  margin: 0 auto;
-  gap: 1rem;
 }
 </style>

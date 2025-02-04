@@ -1,14 +1,24 @@
 <template>
-  <h1>Submit</h1>
-  <p>Submit your food spend for the week starting {{ lastMonday.toDateString() }}</p>
-  <p>This includes all sources of food include takeaways/restaurants.</p>
-  <p v-if="currentValue">Current value: ${{ currentValue }}</p>
-  <form @submit="submitForm">
-    <label for="amount">Amount: $</label>
-    <input type="text" name="amount" placeholder="123.45" />
-    <button type="submit">Submit</button>
-  </form>
-  <RouterLink to="/">Home</RouterLink>
+  <header>
+    <h1>Make Submission</h1>
+    <nav>
+      <RouterLink to="/">Home</RouterLink>
+    </nav>
+  </header>
+  <main>
+    <p>
+      All food spending including takeaways/restaurants for the week starting
+      {{ lastMonday.toDateString() }}:
+      <span v-if="currentValue && currentValue.value != NaN">${{ currentValue }}</span>
+      <span v-else>Not submitted</span>
+    </p>
+    <form @submit="submitForm">
+      <label for="amount">Amount: $</label>
+      <input type="number" name="amount" step="0.01" />
+      <button v-if="currentValue && currentValue.value != NaN" type="submit">Update</button>
+      <button v-else type="submit">Submit</button>
+    </form>
+  </main>
 </template>
 
 <script setup lang="ts">
@@ -59,7 +69,6 @@ const submitForm = (event: Event) => {
     { merge: true },
   )
     .then(() => {
-      alert('Submitted $' + amount + ' for the week starting ' + lastMonday.toDateString())
       getCurrentValue()
       input.amount.value = ''
     })
