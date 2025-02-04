@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+import { RouterView } from 'vue-router'
+onMounted(() => {
+  document.title = 'Food Spend Tracker'
+})
 </script>
 
 <template>
