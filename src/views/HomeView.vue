@@ -131,8 +131,9 @@ const logout = () => {
       {{ referenceDate?.toDateString() }}.
     </p>
     <div id="controls">
-      <button @click="changeWeek(-1)">-1 week</button>
-      <button id="plusoneweek" disabled="true" @click="changeWeek(1)">+1 week</button>
+      <button @click="changeWeek(-1)">&larr;</button>
+      <button @click="getLeaderboard">&#10227; Refresh</button>
+      <button id="plusoneweek" disabled="true" @click="changeWeek(1)">&rarr;</button>
     </div>
     <table id="leaderboard">
       <thead>
