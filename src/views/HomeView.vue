@@ -69,7 +69,6 @@ const getLeaderboard = async () => {
 const changeWeek = (change: number) => {
   page.value += change
   localStorage.setItem('page', page.value.toString())
-  console.log('Page is', page.value)
   if (page.value === 0) {
     document.querySelector('#plusoneweek')?.setAttribute('disabled', 'true')
   } else {
